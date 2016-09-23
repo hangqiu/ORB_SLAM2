@@ -28,13 +28,17 @@ endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
-find_package(OpenCV 2.4.3 REQUIRED)
+set(OpenCV_DIR /home/nsl/opencv-3.1.0/release)
+find_package(OpenCV REQUIRED)
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(Boost  1.54.0  	     # Minimum or EXACT version e.g. 1.36.0
   REQUIRED             					# Fail with error if Boost is not found
   COMPONENTS serialization 				# Boost libraries by their canonical name
   )          
+
+
+#add_subdirectory(Thirdparty/DBoW2)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}

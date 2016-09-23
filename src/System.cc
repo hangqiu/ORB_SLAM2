@@ -35,7 +35,7 @@ namespace ORB_SLAM2
 {
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
-               const bool bUseViewer, const bool bReuse):mSensor(sensor),mbReset(false),mbActivateLocalizationMode(bReuse),
+               const bool bUseViewer, const bool bReuse, const string & mapFilePath ):mSensor(sensor),mbReset(false),mbActivateLocalizationMode(bReuse),
         mbDeactivateLocalizationMode(false)
 {
     // Output welcome message
@@ -92,7 +92,9 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
 	if (bReuse)
 	{
-		LoadMap("Slam_Map.bin");
+//		LoadMap("Slam_Map.bin");
+        LoadMap(mapFilePath.c_str());
+
         
         //mpKeyFrameDatabase->set_vocab(mpVocabulary);
        

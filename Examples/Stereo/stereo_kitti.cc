@@ -25,6 +25,7 @@
 #include<chrono>
 
 #include<opencv2/core/core.hpp>
+#include <iomanip>
 
 #include<System.h>
 
@@ -33,9 +34,13 @@ using namespace std;
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimestamps);
 
+
+//BOOST_CLASS_EXPORT_GUID(derived, "derived")
+
+
 int main(int argc, char **argv)
 {
-    if(argc != 4)
+    if(argc < 5)
     {
         cerr << endl << "Usage: ./stereo_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
         return 1;
@@ -49,8 +54,20 @@ int main(int argc, char **argv)
 
     const int nImages = vstrImageLeft.size();
 
-    // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::STEREO,true);
+    bool bReuseMap = false;
+//    string mapFile;
+    ORB_SLAM2::System* SLAM;
+    if (!strcmp(argv[4], "true")) {
+        bReuseMap = true;
+//        mapFile = argv[5];
+        // Create SLAM system. It initializes all system threads and gets ready to process frames.
+//        SLAM = new ORB_SLAM2::System(argv[1],argv[2],ORB_SLAM2::System::STEREO,true, bReuseMap,  argv[5]);
+        // localization only
+        SLAM = new ORB_SLAM2::System(argv[1],argv[2],ORB_SLAM2::System::STEREO, true, bReuseMap,  argv[5]);
+    }else{
+        SLAM = new ORB_SLAM2::System(argv[1],argv[2],ORB_SLAM2::System::STEREO,true, bReuseMap);
+    }
+
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
@@ -62,7 +79,9 @@ int main(int argc, char **argv)
 
     // Main loop
     cv::Mat imLeft, imRight;
-    for(int ni=0; ni<nImages; ni++)
+    int startFrame = 200;
+    int stopFrame = 250;
+    for(int ni=startFrame; ni<stopFrame && ni<nImages; ni++)
     {
         // Read left and right images from file
         imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
@@ -83,7 +102,7 @@ int main(int argc, char **argv)
 #endif
 
         // Pass the images to the SLAM system
-        SLAM.TrackStereo(imLeft,imRight,tframe);        
+        SLAM->TrackStereo(imLeft,imRight,tframe);
 
 #ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
@@ -102,12 +121,12 @@ int main(int argc, char **argv)
         else if(ni>0)
             T = tframe-vTimestamps[ni-1];
 
-        if(ttrack<T)
-            usleep((T-ttrack)*1e6);
+//        if(ttrack<T)
+//            usleep((T-ttrack)*1e6);
     }
 
     // Stop all threads
-    SLAM.Shutdown();
+    SLAM->Shutdown();
 
     // Tracking time statistics
     sort(vTimesTrack.begin(),vTimesTrack.end());
@@ -121,7 +140,9 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
     // Save camera trajectory
-    SLAM.SaveTrajectoryKITTI("CameraTrajectory.txt");
+    SLAM->SaveMap("Slam_latest_Map.bin");
+    SLAM->SaveTrajectoryKITTI("CameraTrajectory.txt");
+
 
     return 0;
 }

@@ -35,7 +35,6 @@ template<class Archive>
         int nItems = mspMapPoints.size();
         ar & nItems;
         cout << "{INFO}mspMapPoints size = " << nItems << endl;
-
         std::for_each(mspMapPoints.begin(), mspMapPoints.end(), [&ar](MapPoint* pMapPoint) {
             ar & *pMapPoint;
         });

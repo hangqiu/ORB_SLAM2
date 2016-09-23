@@ -51,6 +51,8 @@ MapPoint::MapPoint(const cv::Mat &Pos, KeyFrame *pRefKF, Map* pMap):
     // MapPoints can be created from Tracking and Local Mapping. This recursive_mutex avoid conflicts with id.
     unique_lock<mutex> lock(mpMap->mMutexPointCreation);
     mnId=nNextId++;
+    // added by hang. Initialize uninitialized variable for boost loading traps.
+    mbTrackInView = false;
 }
 
 template<class Archive>
